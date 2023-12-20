@@ -1,10 +1,18 @@
 <template>
   <a-layout class="manage">
-    <Header :routes="routes" :noticeNum="noticeNum" v-model:activeKey="activeKey" @change="handleTabChange" />
+    <Header :routes="routes"
+            :noticeNum="noticeNum"
+            v-model:activeKey="activeKey"
+            @change="handleTabChange" />
     <a-layout>
-      <Sider v-show="!isFullPage" ref="sliderRef" :routeList="routeList" :activeKey="activeKey" />
+      <Sider v-show="!isFullPage"
+             ref="sliderRef"
+             :routeList="routeList"
+             :activeKey="activeKey" />
       <a-layout>
-        <Breaumb v-show="!isFullPage" :routeList="routeList" :activeKey="activeKey" />
+        <Breaumb v-show="!isFullPage"
+                 :routeList="routeList"
+                 :activeKey="activeKey" />
         <Content />
       </a-layout>
     </a-layout>
@@ -41,7 +49,7 @@ export default defineComponent({
     const sliderRef = ref();
     if (isEmpty(localStorage.getItem("accessToken"))) {
       message.error("请先登录");
-      router.push({ path: "/" });
+      // router.push({ path: "/" });
     }
 
     /**

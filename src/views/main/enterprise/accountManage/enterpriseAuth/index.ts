@@ -15,37 +15,7 @@ import { requestDict } from "@/service/common";
 import { message, Upload } from "ant-design-vue";
 import { enterpriseStatus, enterpriseStatusKeys } from "@/utils/dict";
 import auth_status from "@/assets/images/main/accountManage/auth_status.png";
-// Form表单rules
-const rules = {
-  tempEnterpriseName: [
-    {
-      required: true,
-      message: "请输入企业名称",
-      trigger: "blur",
-    },
-  ],
-  tempContractName: [
-    {
-      required: true,
-      message: "请输入合同名称",
-      trigger: "change",
-    },
-  ],
-  tempSignTime: [
-    {
-      required: true,
-      message: "请选择签约时间",
-      trigger: "change",
-    },
-  ],
-  tempContractFiles: [
-    {
-      required: true,
-      message: "请选择合同附件",
-      trigger: ["change", "blur"],
-    },
-  ],
-};
+import type { Rule } from 'ant-design-vue/es/form';
 
 // 文件类型列表
 const imageSuffixNameList = [
@@ -68,7 +38,6 @@ export default defineComponent({
     const router = useRouter();
     const state = reactive({
       loading: false,
-      rules,
       formData: {
         tenantType: 1,
       } as any,
@@ -111,6 +80,65 @@ export default defineComponent({
     onMounted(() => {
       init();
     });
+
+    /**
+     * 校验上传图片
+     * @param _rule 规则
+     * @param value 值
+     */
+    const validatorPic=async (_rule: Rule, value: any)=>{
+      console.log('---validatorPic---',value);
+      const {cardFontPath,cardBackPath,tenantBusinessScope}=value;
+     if(!cardFontPath){
+      return Promise.reject('请上传法人证件正面');
+     }
+     if(!cardBackPath){
+      return Promise.reject('请上传法人证件反面');
+     }
+     if(!tenantBusinessScope){
+      return Promise.reject('请上传工商营业执照');
+     }
+     return Promise.resolve();
+    }
+
+    // 表单校验
+    const rules=ref({
+      tenantType:[{ required: true, message: '请选择认证类型', trigger: ["blur",'change'] }],
+      cardType:[{ required: true, message: '请选择证件类型', trigger: ["blur",'change'] }],
+      pics:[{ required: true, validator:validatorPic, trigger: ["blur",'change'] }],
+      tenantName:[{ required: true, message: '请输入企业名称', trigger: ["blur",'change'] }],
+      tenantCreditCode:[{ required: true, message: '请输入信用代码', trigger: ["blur",'change'] }],
+      organizationType:[{ required: true, message: '请选择组织类型', trigger: ["blur",'change'] }],
+      industryCode:[{ required: true, message: '请选择行业类别', trigger: ["blur",'change'] }],
+      email:[{ required: true, message: '请输入邮箱', trigger: ["blur",'change'] }],
+      tenantRepresentative:[{ required: true, message: '请输入法定代表人', trigger: ["blur",'change'] }],
+      tenantNumber:[{ required: true, message: '请输入法人证件号', trigger: ["blur",'change'] }],
+      contact:[{ required: true, message: '请输入联系人', trigger: ["blur",'change'] }],
+      phoneNumber:[{ required: true, message: '请输入联系方式', trigger: ["blur",'change'] }],
+      address:[{ required: true, message: '请选择所在地', trigger: ["blur",'change'] }],
+      tenantAddress:[{ required: true, message: '请输入地址', trigger: ["blur",'change'] }],
+      tenantBusinessScope:[{ required: true, message: '请输入经营范围', trigger: ["blur",'change'] }],
+    });
+
+    watch(
+      ()=>state.uploadFileList,
+      (newVal)=>{
+        if(newVal){
+          const pics={}
+          Object.keys(newVal).forEach((item:any)=>{
+            const {url}=state.uploadFileList[item];
+            if(url){
+              pics[item]=url;
+            }
+          })
+          state.formData.pics=Object.assign({},pics);
+          formRef&&formRef.value.validateFields('pics');
+        }
+      },
+      {
+        deep:true,
+      }
+      )
 
     /**
      * 初始化
@@ -308,6 +336,7 @@ export default defineComponent({
     return {
       ...toRefs(state),
       formRef,
+      rules,
       handleConfirm,
       handleCancel,
       handleUploadChange,
